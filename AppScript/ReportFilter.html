@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo cáo KQKD tuần theo sản phẩm</title>
+  <style>
+    html, body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f7f7f7;
+    }
+    h2 {
+      text-align: center;
+      color: #E83024;
+      text-transform: uppercase;
+      margin: 20px 0;
+      font-size: 26px;
+      font-weight: bold;
+    }
+    .filter {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .filter select, .filter button {
+      padding: 10px;
+      font-size: 16px;
+      min-width: 180px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .filter select {
+      height: 42px;
+    }
+    .filter button {
+      background-color: #E83024;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      border: none;
+    }
+    .filter button:hover {
+      background-color: #c12b1d;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    th, td {
+      border: 1px solid #E83024;
+      padding: 12px;
+      text-align: center;
+    }
+    th {
+      background-color: #E83024;
+      color: white;
+      font-size: 15px;
+    }
+    td.bold {
+      font-weight: bold;
+      background: #fff3f0;
+    }
+    td.highlight {
+      background-color: #fff9c4;
+      font-weight: bold;
+    }
+    tr.total-row {
+      background-color: #ffe5d0;
+      font-weight: bold;
+    }
+    .loading {
+      text-align: center;
+      margin-top: 20px;
+      font-style: italic;
+      color: gray;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 1024px) {
+      h2 { font-size: 24px; }
+      .filter select, .filter button { min-width: 140px; font-size: 14px; }
+      table { font-size: 14px; }
+    }
+    @media (max-width: 768px) {
+      h2 { font-size: 22px; }
+      .filter { flex-direction: column; align-items: center; }
+      .filter select, .filter button { width: 100%; font-size: 14px; }
+      table { font-size: 12px; }
+    }
+    @media (max-width: 480px) {
+      h2 { font-size: 20px; }
+      .filter { padding: 10px; }
+      .filter select, .filter button { font-size: 12px; }
+      table { font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <h2>Báo cáo KQKD tuần theo sản phẩm</h2>
+
+  <div class="filter">
+    <select id="month"></select>
+    <select id="year"></select>
+    <select id="viewMode" onchange="toggleEmployeeFilter()">
+      <option value="branch">Toàn chi nhánh</option>
+      <option value="employee">Chọn theo nhân viên</option>
+    </select>
+    <select id="nhanvien" multiple size="6" style="display:none;"></select>
+    <button onclick="fetchData()">Xem báo cáo</button>
+  </div>
+
+  <div class="loading" id="loading">Đang tải dữ liệu...</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Sản phẩm</th>
+        <th>Chi tiết sản phẩm</th>
+        <th>Tuần 1</th>
+        <th>Tuần 2</th>
+        <th>Tuần 3</th>
+        <th>Tuần 4</th>
+        <th>Tuần 5</th>
+        <th>Tổng</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <script>
+    const structure = {
+      "Casa": ["Casa BQ tăng net"],
+      "CCQ": ["CCQ BQ tăng net"],
+      "FD": ["FD mới", "FD gia hạn"],
+      "Bond": ["Bond mới", "Bond gia hạn"],
+      "Lending": ["GN - Thế chấp", "GN - Tín chấp", "GN - Ứng vốn"],
+      "Thẻ tín dụng": ["Chi tiêu"],
+      "NFI": ["TKSĐ", "Banca NT", "Banca PNT", "FX", "Khác"],
+      "TKMM": ["Tự mở", "CTV", "Activation"]
+    };
+
+    const employeeList = [
+      "KSV1",
+      "GDV1",
+      "SRM1",
+      "Trưởng phòng tín dụng",
+      "Tín dụng 1",
+      "Tín dụng 2",
+      "Tín dụng 3",
+      "Tín dụng 4"
+    ];
+
+    function toggleEmployeeFilter() {
+      const viewMode = document.getElementById("viewMode").value;
+      document.getElementById("nhanvien").style.display = viewMode === "employee" ? "inline-block" : "none";
+    }
+
+    function initFilters() {
+      const mSel = document.getElementById("month");
+      const ySel = document.getElementById("year");
+      const nSel = document.getElementById("nhanvien");
+
+      const now = new Date();
+      const thisMonth = now.getMonth() + 1;
+      const thisYear = now.getFullYear();
+
+      for (let m = 1; m <= 12; m++) {
+        mSel.innerHTML += `<option value="${m}" ${m === thisMonth ? 'selected' : ''}>Tháng ${m}</option>`;
+      }
+      for (let y = thisYear - 3; y <= thisYear; y++) {
+        ySel.innerHTML += `<option value="${y}" ${y === thisYear ? 'selected' : ''}>${y}</option>`;
+      }
+
+      employeeList.forEach(name => {
+        nSel.innerHTML += `<option value="${name}">${name}</option>`;
+      });
+
+      fetchData();
+    }
+
+    function fetchData() {
+      document.getElementById("loading").style.display = "block";
+      const mode = document.getElementById("viewMode").value;
+      let selectedEmployees = [];
+
+      if (mode === "employee") {
+        const selected = document.getElementById("nhanvien").selectedOptions;
+        selectedEmployees = Array.from(selected).map(opt => opt.value);
+      }
+
+      const filter = {
+        month: document.getElementById("month").value,
+        year: document.getElementById("year").value,
+        nhanvien: mode === "employee" ? selectedEmployees : "Toàn chi nhánh"
+      };
+
+      google.script.run.withSuccessHandler(renderTable).getKQKDFilteredData(filter);
+    }
+
+    function renderTable(data) {
+      const body = document.getElementById("tableBody");
+      const loading = document.getElementById("loading");
+      body.innerHTML = "";
+      loading.style.display = "none";
+
+      for (const sp in structure) {
+        const details = structure[sp];
+        let productTotals = { "Tuần 1": 0, "Tuần 2": 0, "Tuần 3": 0, "Tuần 4": 0, "Tuần 5": 0, "Tổng": 0 };
+
+        details.forEach((ctsp, i) => {
+          const d = data[ctsp] || {};
+          const row = document.createElement("tr");
+
+          if (i === 0) {
+            const spCell = document.createElement("td");
+            spCell.rowSpan = details.length + 1; // +1 để chừa dòng tổng
+            spCell.textContent = sp;
+            spCell.className = "bold";
+            row.appendChild(spCell);
+          }
+
+          const ctCell = document.createElement("td");
+          ctCell.textContent = ctsp;
+          ctCell.className = "bold";
+          row.appendChild(ctCell);
+
+          for (let w = 1; w <= 5; w++) {
+            const td = document.createElement("td");
+            const val = d[`Tuần ${w}`] || 0;
+            td.textContent = val.toLocaleString();
+            if (val !== 0) td.className = "highlight";
+            row.appendChild(td);
+            productTotals[`Tuần ${w}`] += val;
+          }
+
+          const total = document.createElement("td");
+          const totalVal = d["Tổng"] || 0;
+          total.textContent = totalVal.toLocaleString();
+          if (totalVal !== 0) total.className = "highlight";
+          row.appendChild(total);
+          productTotals["Tổng"] += totalVal;
+
+          body.appendChild(row);
+        });
+
+        const totalRow = document.createElement("tr");
+        totalRow.className = "total-row";
+        totalRow.innerHTML = `<td>Tổng ${sp}</td>
+          <td>${productTotals["Tuần 1"].toLocaleString()}</td>
+          <td>${productTotals["Tuần 2"].toLocaleString()}</td>
+          <td>${productTotals["Tuần 3"].toLocaleString()}</td>
+          <td>${productTotals["Tuần 4"].toLocaleString()}</td>
+          <td>${productTotals["Tuần 5"].toLocaleString()}</td>
+          <td>${productTotals["Tổng"].toLocaleString()}</td>`;
+        body.appendChild(totalRow);
+      }
+    }
+
+    initFilters();
+  </script>
+</body>
+</html>

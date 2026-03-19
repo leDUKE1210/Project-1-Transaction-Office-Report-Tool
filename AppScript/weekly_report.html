@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Cam Kết Hàng Tuần</title>
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background: #f7f8fa;
+            color: #222;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 32px 28px 24px 28px;
+            border-radius: 18px;
+            box-shadow: 0 2px 24px 0 rgba(0,0,0,0.06);
+        }
+        h2 {
+            color: #222;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 28px;
+            letter-spacing: 0.5px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 500;
+            color: #444;
+            letter-spacing: 0.1px;
+        }
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafbfc;
+            font-size: 1rem;
+            color: #222;
+            transition: border 0.2s;
+            outline: none;
+        }
+        select:focus, input[type="text"]:focus, input[type="number"]:focus {
+            border: 1.5px solid #1976d2;
+            background: #fff;
+        }
+        .product-section {
+            border: 1px solid #f0f0f0;
+            padding: 18px 16px 10px 16px;
+            margin-bottom: 22px;
+            border-radius: 12px;
+            background: #fcfcfd;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #1976d2;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        /* Switch style for checkbox */
+        .checkbox-label input[type="checkbox"] {
+            width: 38px;
+            height: 22px;
+            appearance: none;
+            background: #e0e0e0;
+            outline: none;
+            border-radius: 12px;
+            position: relative;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .checkbox-label input[type="checkbox"]:checked {
+            background: #1976d2;
+        }
+        .checkbox-label input[type="checkbox"]::before {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            transition: left 0.2s;
+        }
+        .checkbox-label input[type="checkbox"]:checked::before {
+            left: 19px;
+        }
+        .product-details {
+            display: none;
+            margin-left: 0;
+            margin-top: 10px;
+        }
+        .detail-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .detail-label {
+            min-width: 90px;
+            font-weight: 500;
+            color: #555;
+            text-align: right;
+            padding-right: 8px;
+            font-size: 0.98rem;
+        }
+        .detail-row input {
+            width: 200px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 1rem;
+            background: #fafbfc;
+            color: #222;
+            transition: border 0.2s;
+        }
+        .detail-row input:focus {
+            border: 1.5px solid #1976d2;
+            background: #fff;
+        }
+        /* Styling for number inputs */
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        /* Error styling for invalid inputs */
+        input[type="number"]:invalid {
+            border-color: #dc3545;
+            background-color: #fff5f5;
+        }
+        #submitReport {
+            width: 100%;
+            padding: 13px 0;
+            background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-top: 18px;
+            box-shadow: 0 2px 8px 0 rgba(25, 118, 210, 0.08);
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        #submitReport:hover {
+            background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+            box-shadow: 0 4px 16px 0 rgba(25, 118, 210, 0.13);
+        }
+        @media (max-width: 700px) {
+            .container {
+                max-width: 98vw;
+                padding: 10px 2vw;
+            }
+            .detail-row input {
+                width: 100%;
+            }
+        }
+        .unit-note {
+            color: #1976d2;
+            font-size: 0.92em;
+            margin-left: 6px;
+            font-style: italic;
+            font-weight: 400;
+            vertical-align: baseline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Báo Cáo Cam Kết Hàng Tuần</h2>
+        
+        <!-- Switch để chọn loại báo cáo -->
+        <div class="form-group" style="margin-bottom: 24px;">
+            <label style="margin-bottom: 12px; font-weight: 600; color: #1976d2;">Loại báo cáo:</label>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <label class="checkbox-label" style="margin: 0;">
+                    <input type="radio" name="reportType" value="employee" checked onchange="toggleReportType()">
+                    <span style="margin-left: 8px;">Báo cáo nhân viên</span>
+                </label>
+                <label class="checkbox-label" style="margin: 0;">
+                    <input type="radio" name="reportType" value="bm" onchange="toggleReportType()">
+                    <span style="margin-left: 8px;">Báo cáo BM</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="employee">Tên nhân viên: <span style="color:red">*</span></label>
+            <select id="employee" required>
+                <option value="">Chọn nhân viên</option>
+                    <option value="1">KSV1</option>
+                    <option value="2">GDV1</option>
+                    <option value="3">SRM1</option>
+                    <option value="4">Trưởng phòng tín dụng</option>
+                    <option value="5">Tín dụng 1</option>
+                    <option value="6">Tín dụng 2</option>
+                    <option value="7">Tín dụng 3</option>
+                    <option value="8">Tín dụng 4</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="month">Tháng: <span style="color:red">*</span></label>
+            <select id="month" required>
+                <option value="">Chọn tháng</option>
+                <option value="1">Tháng 1</option>
+                <option value="2">Tháng 2</option>
+                <option value="3">Tháng 3</option>
+                <option value="4">Tháng 4</option>
+                <option value="5">Tháng 5</option>
+                <option value="6">Tháng 6</option>
+                <option value="7">Tháng 7</option>
+                <option value="8">Tháng 8</option>
+                <option value="9">Tháng 9</option>
+                <option value="10">Tháng 10</option>
+                <option value="11">Tháng 11</option>
+                <option value="12">Tháng 12</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="week">Tuần: <span style="color:red">*</span></label>
+            <select id="week" required>
+                <option value="">Chọn tuần</option>
+                <option value="1">Tuần 1</option>
+                <option value="2">Tuần 2</option>
+                <option value="3">Tuần 3</option>
+                <option value="4">Tuần 4</option>
+                <option value="5">Tuần 5</option>
+            </select>
+        </div>
+
+        <!-- Lending Section -->
+        <div class="product-section">
+            <label class="checkbox-label">
+                <input type="checkbox" id="lending" onchange="toggleSection('lending-details', 'lending')">
+                Lending <span class="unit-note">(triệu đồng)</span>
+            </label>
+            <div id="lending-details" class="product-details">
+                <div class="detail-row">
+                    <span class="detail-label">Trình</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Trình">
+                    <input type="text" placeholder="Kế hoạch Trình">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phê duyệt</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Phê duyệt">
+                    <input type="text" placeholder="Kế hoạch Phê duyệt">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Giải ngân</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Giải ngân">
+                    <input type="text" placeholder="Kế hoạch Giải ngân">
+                </div>
+            </div>
+        </div>
+
+        <!-- NFI Section -->
+        <div class="product-section">
+            <label class="checkbox-label">
+                <input type="checkbox" id="nfi" onchange="toggleSection('nfi-details', 'nfi')">
+                NFI <span class="unit-note">(triệu đồng)</span>
+            </label>
+            <div id="nfi-details" class="product-details">
+                <div class="detail-row">
+                    <span class="detail-label">TKSĐ</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết TKSĐ">
+                    <input type="text" placeholder="Kế hoạch TKSĐ">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">FX</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết FX">
+                    <input type="text" placeholder="Kế hoạch FX">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Banca NT</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Banca NT">
+                    <input type="text" placeholder="Kế hoạch Banca NT">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Banca PNT</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Banca PNT">
+                    <input type="text" placeholder="Kế hoạch Banca PNT">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Khác</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Khác">
+                    <input type="text" placeholder="Kế hoạch Khác">
+                </div>
+            </div>
+        </div>
+
+        <!-- Thẻ tín dụng Section -->
+        <div class="product-section">
+            <label class="checkbox-label">
+                <input type="checkbox" id="credit-card" onchange="toggleSection('credit-card-details', 'credit-card')">
+                Thẻ tín dụng
+            </label>
+            <div id="credit-card-details" class="product-details" style="display: none;">
+                <div class="detail-row">
+                    <span class="detail-label">Trình</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Trình">
+                    <input type="text" placeholder="Kế hoạch Trình">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phê duyệt</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Phê duyệt">
+                    <input type="text" placeholder="Kế hoạch Phê duyệt">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Active</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Active">
+                    <input type="text" placeholder="Kế hoạch Active">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Chi tiêu</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Chi tiêu">
+                    <input type="text" placeholder="Kế hoạch Chi tiêu">
+                </div>
+            </div>
+        </div>
+
+        <!-- TKMM Section -->
+        <div class="product-section">
+            <label class="checkbox-label">
+                <input type="checkbox" id="tkmm" onchange="toggleSection('tkmm-details', 'tkmm')">
+                TKMM
+            </label>
+            <div id="tkmm-details" class="product-details">
+                <div class="detail-row">
+                    <span class="detail-label">Tự mở</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Tự mở">
+                    <input type="text" placeholder="Kế hoạch Tự mở">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">CTV</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết CTV">
+                    <input type="text" placeholder="Kế hoạch CTV">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Activation</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Activation">
+                    <input type="text" placeholder="Kế hoạch Activation">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">MassAff</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết MassAff">
+                    <input type="text" placeholder="Kế hoạch MassAff">
+                </div>
+            </div>
+        </div>
+        <!-- Casa Section -->
+        <div class="product-section">
+            <label class="checkbox-label">
+                <input type="checkbox" id="casa" onchange="toggleSection('casa-details', 'casa')">
+                Casa <span class="unit-note">(triệu đồng)</span>
+            </label>
+            <div id="casa-details" class="product-details">
+                <div class="detail-row">
+                    <span class="detail-label">CASA BQ tăng net</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết CASA BQ tăng net">
+                    <input type="text" placeholder="Kế hoạch CASA BQ tăng net">
+                </div>
+            </div>
+        </div>
+        <!-- Bond Section -->
+        <div class="product-section">
+            <label class="checkbox-label">
+                <input type="checkbox" id="bond" onchange="toggleSection('bond-details', 'bond')">
+                Bond <span class="unit-note">(triệu đồng)</span>
+            </label>
+            <div id="bond-details" class="product-details">
+                <div class="detail-row">
+                    <span class="detail-label">Bond mới</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Bond mới">
+                    <input type="text" placeholder="Kế hoạch Bond mới">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Bond gia hạn</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết Bond gia hạn">
+                    <input type="text" placeholder="Kế hoạch Bond gia hạn">
+                </div>
+            </div>
+        </div>
+        <!-- FD Section -->
+        <div class="product-section">
+            <label class="checkbox-label">
+                <input type="checkbox" id="fd" onchange="toggleSection('fd-details', 'fd')">
+                FD <span class="unit-note">(triệu đồng)</span>
+            </label>
+            <div id="fd-details" class="product-details">
+                <div class="detail-row">
+                    <span class="detail-label">FD mới</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết FD mới">
+                    <input type="text" placeholder="Kế hoạch FD mới">
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">FD gia hạn</span>
+                    <input type="text" class="so-cam-ket" placeholder="Số cam kết FD gia hạn">
+                    <input type="text" placeholder="Kế hoạch FD gia hạn">
+                </div>
+            </div>
+        </div>
+        <button type="button" id="submitReport">Gửi báo cáo</button>
+    </div>
+
+    <script>
+        // Format number with dot as thousand separator
+        function formatNumberWithDot(value) {
+            value = value.replace(/\D/g, '');
+            if (!value) return '';
+            return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Add event listeners to all so-cam-ket inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.so-cam-ket').forEach(input => {
+                input.addEventListener('input', function(e) {
+                    let cursorPos = input.selectionStart;
+                    let oldLength = input.value.length;
+                    let raw = input.value.replace(/\D/g, '');
+                    input.value = formatNumberWithDot(raw);
+                    // Giữ vị trí con trỏ
+                    let newLength = input.value.length;
+                    input.setSelectionRange(cursorPos + (newLength - oldLength), cursorPos + (newLength - oldLength));
+                });
+                input.addEventListener('keypress', function(e) {
+                    // Chỉ cho phép số
+                    if (e.which < 48 || e.which > 57) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+
+        function toggleReportType() {
+            const employeeSelect = document.getElementById('employee');
+            const weekSelect = document.getElementById('week');
+            const reportType = document.querySelector('input[name="reportType"]:checked').value;
+            
+            // Clear current selection
+            employeeSelect.value = '';
+            weekSelect.value = '';
+            
+            if (reportType === 'bm') {
+                // Ẩn dropdown nhân viên và tuần cho BM
+                employeeSelect.parentElement.style.display = 'none';
+                weekSelect.parentElement.style.display = 'none';
+                
+                // Hiển thị cả hai cột (cam kết và kế hoạch) cho BM
+                document.querySelectorAll('.detail-row').forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    if (inputs.length >= 2) {
+                        // Hiển thị cả hai ô
+                        inputs[0].style.display = 'block';
+                        inputs[1].style.display = 'block';
+                        // Giữ nguyên kích thước
+                        inputs[0].style.width = '200px';
+                        inputs[1].style.width = '200px';
+                    }
+                });
+            } else {
+                // Hiển thị lại dropdown nhân viên và tuần
+                employeeSelect.parentElement.style.display = 'block';
+                weekSelect.parentElement.style.display = 'block';
+                
+                // Hiển thị lại tất cả input fields
+                document.querySelectorAll('.detail-row').forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    if (inputs.length >= 2) {
+                        // Hiển thị lại ô kế hoạch
+                        inputs[1].style.display = 'block';
+                        // Thu hẹp ô cam kết về kích thước ban đầu
+                        inputs[0].style.width = '200px';
+                    }
+                });
+                
+                // Hiển thị danh sách nhân viên
+                employeeSelect.innerHTML = `
+                    <option value="">Chọn nhân viên</option>
+                        <option value="1">KSV1</option>
+                        <option value="2">GDV1</option>
+                        <option value="3">SRM1</option>
+                        <option value="4">Trưởng phòng tín dụng</option>
+                        <option value="5">Tín dụng 1</option>
+                        <option value="6">Tín dụng 2</option>
+                        <option value="7">Tín dụng 3</option>
+                        <option value="8">Tín dụng 4</option>
+                `;
+            }
+        }
+
+        function toggleSection(sectionId, checkboxId) {
+            const section = document.getElementById(sectionId);
+            const checkbox = document.getElementById(checkboxId);
+            if (section && checkbox) {
+                section.style.display = checkbox.checked ? 'block' : 'none';
+            }
+        }
+
+        document.getElementById('submitReport').addEventListener('click', function() {
+            // Lấy thông tin chung
+            const employeeSelect = document.getElementById('employee');
+            const monthSelect = document.getElementById('month');
+            const weekSelect = document.getElementById('week');
+            const reportType = document.querySelector('input[name="reportType"]:checked').value;
+            const month = monthSelect.value ? `Tháng ${monthSelect.value}` : '';
+            
+            let employee, week;
+            
+            if (reportType === 'bm') {
+                // Cho BM report, sử dụng giá trị cố định
+                employee = 'BM';
+                week = 'Tuần 0'; // Giá trị mặc định cho BM
+            } else {
+                // Cho employee report, lấy từ dropdown
+                employee = employeeSelect.selectedOptions[0].textContent.trim();
+                week = weekSelect.value ? `Tuần ${weekSelect.value}` : '';
+            }
+
+            // Kiểm tra bắt buộc
+            if (reportType === 'bm') {
+                // Chỉ cần kiểm tra tháng cho BM
+                if (!monthSelect.value) {
+                    alert('Vui lòng chọn Tháng trước khi gửi báo cáo BM!');
+                    return;
+                }
+            } else {
+                // Kiểm tra đầy đủ cho nhân viên
+                if (!employeeSelect.value || !monthSelect.value || !weekSelect.value) {
+                    alert('Vui lòng chọn đầy đủ Tên nhân viên, Tháng và Tuần trước khi gửi báo cáo!');
+                    return;
+                }
+            }
+
+            // Danh sách sản phẩm và chi tiết
+            const products = [
+                {
+                    id: 'lending',
+                    name: 'Lending',
+                    details: [
+                        { label: 'Trình', selector: '#lending-details .detail-row:nth-child(1)' },
+                        { label: 'Phê duyệt', selector: '#lending-details .detail-row:nth-child(2)' },
+                        { label: 'Giải ngân', selector: '#lending-details .detail-row:nth-child(3)' }
+                    ]
+                },
+                {
+                    id: 'nfi',
+                    name: 'NFI',
+                    details: [
+                        { label: 'TKSĐ', selector: '#nfi-details .detail-row:nth-child(1)' },
+                        { label: 'FX', selector: '#nfi-details .detail-row:nth-child(2)' },
+                        { label: 'Banca NT', selector: '#nfi-details .detail-row:nth-child(3)' },
+                        { label: 'Banca PNT', selector: '#nfi-details .detail-row:nth-child(4)' },
+                        { label: 'Khác', selector: '#nfi-details .detail-row:nth-child(5)' }
+                    ]
+                },
+                {
+                    id: 'credit-card',
+                    name: 'Thẻ tín dụng',
+                    details: [
+                        { label: 'Trình', selector: '#credit-card-details .detail-row:nth-child(1)' },
+                        { label: 'Phê duyệt', selector: '#credit-card-details .detail-row:nth-child(2)' },
+                        { label: 'Active', selector: '#credit-card-details .detail-row:nth-child(3)' },
+                        { label: 'Chi tiêu', selector: '#credit-card-details .detail-row:nth-child(4)' }
+                    ]
+                },
+                {
+                    id: 'tkmm',
+                    name: 'TKMM',
+                    details: [
+                        { label: 'Tự mở', selector: '#tkmm-details .detail-row:nth-child(1)' },
+                        { label: 'CTV', selector: '#tkmm-details .detail-row:nth-child(2)' },
+                        { label: 'Activation', selector: '#tkmm-details .detail-row:nth-child(3)' },
+                        { label: 'MassAff', selector: '#tkmm-details .detail-row:nth-child(4)' }
+                    ]
+                },
+                {
+                    id: 'casa',
+                    name: 'Casa',
+                    details: [
+                        { label: 'CASA BQ tăng net', selector: '#casa-details .detail-row:nth-child(1)' }
+                    ]
+                },
+                {
+                    id: 'bond',
+                    name: 'Bond',
+                    details: [
+                        { label: 'Bond mới', selector: '#bond-details .detail-row:nth-child(1)' },
+                        { label: 'Bond gia hạn', selector: '#bond-details .detail-row:nth-child(2)' }
+                    ]
+                },
+                {
+                    id: 'fd',
+                    name: 'FD',
+                    details: [
+                        { label: 'FD mới', selector: '#fd-details .detail-row:nth-child(1)' },
+                        { label: 'FD gia hạn', selector: '#fd-details .detail-row:nth-child(2)' }
+                    ]
+                }
+            ];
+
+            const dataToSend = [];
+            products.forEach(product => {
+                if (document.getElementById(product.id).checked) {
+                    product.details.forEach(detail => {
+                        const rowDiv = document.querySelector(detail.selector);
+                        if (rowDiv) {
+                            const inputs = rowDiv.querySelectorAll('input');
+                            if (inputs.length >= 1) {
+                                let soCamKet = inputs[0].value.trim();
+                                let keHoachCamKet = '';
+                                
+                                // Nếu là employee report và có input thứ 2 (kế hoạch)
+                                if (reportType === 'employee' && inputs.length >= 2) {
+                                    keHoachCamKet = inputs[1].value.trim();
+                                }
+                                
+                                // Nếu là BM report và có input thứ 2 (kế hoạch)
+                                if (reportType === 'bm' && inputs.length >= 2) {
+                                    keHoachCamKet = inputs[1].value.trim();
+                                }
+                                
+                                // Nhân với 1 triệu cho Lending, NFI, Casa, Bond, FD
+                                if (["Lending", "NFI", "Casa", "Bond", "FD"].includes(product.name)) {
+                                    if (soCamKet !== '') {
+                                        soCamKet = (parseFloat(soCamKet.replace(/\./g, '')) * 1000000).toString();
+                                    }
+                                    if (keHoachCamKet !== '' && /^\d+[\d.]*$/.test(keHoachCamKet)) {
+                                        keHoachCamKet = (parseFloat(keHoachCamKet.replace(/\./g, '')) * 1000000).toString();
+                                    }
+                                }
+                                
+                                // Chỉ gửi nếu có dữ liệu cam kết
+                                if (soCamKet !== '') {
+                                    soCamKet = soCamKet.replace(/\./g, ''); // Loại bỏ dấu chấm trước khi gửi
+                                    dataToSend.push({
+                                        month,
+                                        week,
+                                        name: employee,
+                                        product: product.name,
+                                        detail: detail.label,
+                                        soCamKet,
+                                        keHoachCamKet,
+                                        reportType: reportType
+                                    });
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+
+            if (dataToSend.length > 0) {
+                console.log('Dữ liệu sẽ gửi:', dataToSend);
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        console.log('Kết quả từ server:', result);
+                        alert("✅ Đã gửi báo cáo thành công! ✅\n" + result.message);
+                        // Reset form sau khi gửi thành công
+                        document.getElementById('month').value = '';
+                        
+                        if (reportType === 'employee') {
+                            document.getElementById('employee').value = '';
+                            document.getElementById('week').value = '';
+                        }
+                        
+                        // Uncheck tất cả checkbox và ẩn các section
+                        ['lending', 'nfi', 'credit-card', 'tkmm', 'casa', 'bond', 'fd'].forEach(id => {
+                            const checkbox = document.getElementById(id);
+                            if (checkbox) {
+                                checkbox.checked = false;
+                                toggleSection(id + '-details', id);
+                            }
+                        });
+                        
+                        // Clear tất cả input fields
+                        document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
+                            input.value = '';
+                        });
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error('Lỗi từ server:', error);
+                        alert("❌ Lỗi khi gửi báo cáo: " + error.message);
+                    })
+                    .saveCKKDraw(dataToSend);
+            } else {
+                console.log('Không có dữ liệu để gửi');
+                alert('❗❗ Không có dữ liệu cam kết nào để gửi. ❗❗');
+            }
+        });
+    </script>
+</body>
+</html> 

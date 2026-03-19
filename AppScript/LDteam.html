@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDteam</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .filter-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .table-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background-color: #2c3e50;
+            border-color: #2c3e50;
+        }
+        .btn-primary:hover {
+            background-color: #34495e;
+            border-color: #34495e;
+        }
+        .form-select, .form-control {
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+        }
+        /* Add highlight style for non-zero values */
+        .highlight-value {
+            background-color: #e8f4f8;
+        }
+        /* Overlay loading spinner for table */
+        .table-loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            font-size: 1.3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Dropdown chọn loại báo cáo -->
+        <div class="mb-4" style="text-align:center;">
+            <label for="mainReportType" style="font-weight:bold;">Chọn loại báo cáo: </label>
+            <select id="mainReportType" onchange="switchReportType()" style="padding:6px 12px; border-radius:6px; margin-left:8px;">
+                <option value="ldteam">Báo cáo LD team</option>
+                <option value="summary">Báo cáo tổng hợp kinh doanh</option>
+            </select>
+        </div>
+
+        <!-- Section Báo cáo LDteam (giữ nguyên) -->
+        <div id="ldteamSection">
+            <div class="header">
+                <h1>Báo cáo LD team</h1>
+            </div>
+            <div class="filter-section">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Loại báo cáo</label>
+                        <select class="form-select" id="reportType" onchange="handleReportTypeChange()">
+                            <option value="date">Theo ngày</option>
+                            <option value="month">Theo tháng</option>
+                            <option value="week">Theo tuần</option>
+                            <option value="year">Theo năm</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Chọn thời gian</label>
+                        <input type="date" class="form-control d-none" id="dateFilter">
+                        <div class="d-none" id="weekFilterContainer">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="month" class="form-control" id="weekMonthFilter">
+                                </div>
+                                <div class="col-6">
+                                    <select class="form-select" id="weekNumberFilter">
+                                        <option value="1">Tuần 1</option>
+                                        <option value="2">Tuần 2</option>
+                                        <option value="3">Tuần 3</option>
+                                        <option value="4">Tuần 4</option>
+                                        <option value="5">Tuần 5</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="month" class="form-control d-none" id="monthFilter">
+                        <input type="number" class="form-control d-none" id="yearFilter" min="2023" max="2024" step="1" placeholder="Nhập năm">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Loại dữ liệu</label>
+                        <select class="form-select" id="dataType" onchange="handleDataTypeChange()">
+                            <option value="team">Tổng hợp team</option>
+                            <option value="personal">Số liệu cá nhân</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12 text-end">
+                        <button class="btn btn-primary" onclick="applyFilters()">
+                            <i class="fas fa-sync-alt me-2"></i>Tải lại dữ liệu
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div id="tableLoadingOverlay" class="table-loading-overlay" style="display:none">
+                    <div>
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <div style="margin-top:8px;">Đang tải dữ liệu...</div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Chi tiết báo cáo</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover" id="reportTable">
+                        <thead id="tableHeader">
+                            <!-- Table headers will be populated dynamically -->
+                        </thead>
+                        <tbody id="reportTableBody">
+                            <!-- Table data will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Báo cáo tổng hợp kinh doanh (Bootstrap style, đồng nhất với LDteam) -->
+        <div id="summarySection" style="display:none">
+            <div class="header">
+                <h1>Báo cáo tổng hợp kinh doanh</h1>
+            </div>
+            <div class="filter-section">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label">Loại báo cáo</label>
+                        <select class="form-select" id="summary-mode" onchange="summaryToggleInput()">
+                            <option value="date">Theo ngày</option>
+                            <option value="week">Theo tuần</option>
+                            <option value="month">Theo tháng</option>
+                            <option value="year">Theo năm</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2" id="summary-dateCol">
+                        <label class="form-label">Chọn ngày</label>
+                        <input type="date" class="form-control" id="summary-dateInput">
+                    </div>
+                    <div class="col-md-2 d-none" id="summary-monthCol">
+                        <label class="form-label">Chọn tháng</label>
+                        <input type="month" class="form-control" id="summary-monthInput">
+                    </div>
+                    <div class="col-md-2 d-none" id="summary-yearCol">
+                        <label class="form-label">Chọn năm</label>
+                        <input type="number" class="form-control" id="summary-yearInput" placeholder="Năm">
+                    </div>
+                    <div class="col-md-2 d-none" id="summary-weekMonthCol">
+                        <label class="form-label">Tháng</label>
+                        <select class="form-select" id="summary-monthSelect">
+                            <option value="1">Tháng 1</option>
+                            <option value="2">Tháng 2</option>
+                            <option value="3">Tháng 3</option>
+                            <option value="4">Tháng 4</option>
+                            <option value="5">Tháng 5</option>
+                            <option value="6">Tháng 6</option>
+                            <option value="7">Tháng 7</option>
+                            <option value="8">Tháng 8</option>
+                            <option value="9">Tháng 9</option>
+                            <option value="10">Tháng 10</option>
+                            <option value="11">Tháng 11</option>
+                            <option value="12">Tháng 12</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-none" id="summary-weekCol">
+                        <label class="form-label">Tuần</label>
+                        <select class="form-select" id="summary-weekSelect">
+                            <option value="1">Tuần 1</option>
+                            <option value="2">Tuần 2</option>
+                            <option value="3">Tuần 3</option>
+                            <option value="4">Tuần 4</option>
+                            <option value="5">Tuần 5</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Chế độ xem</label>
+                        <select class="form-select" id="summary-viewMode" onchange="summaryToggleStaffSelect()">
+                            <option value="all">Toàn chi nhánh</option>
+                            <option value="staff">Từng nhân viên</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-none" id="summary-staffCol">
+                        <label class="form-label">Nhân viên</label>
+                        <select class="form-select" id="summary-staffSelect">
+                            <option disabled selected>-- Chọn nhân viên --</option>
+                            <option>KSV1</option>
+                            <option>GDV1</option>
+                            <option>SRM1</option>
+                            <option>Trưởng phòng tín dụng</option>
+                            <option>Tín dụng 1</option>
+                            <option>Tín dụng 2</option>
+                            <option>Tín dụng 3</option>
+                            <option>Tín dụng 4</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12 text-end">
+                        <button class="btn btn-primary" onclick="summaryLoadData()">
+                            <i class="fas fa-sync-alt me-2"></i>Tải lại dữ liệu
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="table-container mt-3">
+                <div id="summaryTableLoadingOverlay" class="table-loading-overlay" style="display:none">
+                    <div>
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <div style="margin-top:8px;">Đang tải dữ liệu...</div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover" id="summary-reportTable">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Chi tiết sản phẩm</th>
+                                <th>Báo cáo đầu ngày</th>
+                                <th>Báo cáo cuối ngày</th>
+                                <th>Đánh giá</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summary-reportBody">
+                            <tr><td colspan="5" class="loading">Chưa có dữ liệu...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Team columns configuration
+        const teamColumns = [
+            { id: 'product', label: 'Loại sản phẩm' },
+            { id: 'detail', label: 'Chi tiết sản phẩm' },
+            { id: 'begin', label: 'BC đầu ngày' },
+            { id: 'end', label: 'BC cuối ngày' },
+            { id: 'result', label: 'Đánh giá' }
+        ];
+
+        // Personal columns configuration
+        const personalColumns = [
+            { id: 'product', label: 'Loại sản phẩm' },
+            { id: 'detail', label: 'Chi tiết sản phẩm' }
+        ];
+
+        // Danh sách nhân viên đúng thứ tự, đồng bộ backend
+        const staffList = [
+            "KSV1",
+            "GDV1",
+            "SRM1",
+            "Trưởng phòng tín dụng",
+            "Tín dụng 1",
+            "Tín dụng 2",
+            "Tín dụng 3",
+            "Tín dụng 4"
+        ];
+
+        // Danh sách sản phẩm và chi tiết có thứ tự cố định
+        const productDetails = [
+            { product: 'Lending', details: ['Trình', 'Phê duyệt', 'GN - Tín chấp', 'GN - Thế chấp', 'GN - Ứng vốn'] },
+            { product: 'Thẻ tín dụng', details: ['Trình', 'Phê duyệt', 'Active', 'Chi tiêu'] },
+            { product: 'Casa', details: ['CASA BQ tăng net'] },
+            { product: 'NFI', details: ['TKSĐ', 'FX', 'Banca NT', 'Banca PNT', 'Khác'] },
+            { product: 'TKMM', details: ['Tự mở', 'CTV', 'Activation'] }
+        ];
+
+        function handleReportTypeChange() {
+            const reportType = document.getElementById('reportType').value;
+            const dateFilter = document.getElementById('dateFilter');
+            const weekFilterContainer = document.getElementById('weekFilterContainer');
+            const monthFilter = document.getElementById('monthFilter');
+            const yearFilter = document.getElementById('yearFilter');
+
+            // Hide all filters first
+            dateFilter.classList.add('d-none');
+            weekFilterContainer.classList.add('d-none');
+            monthFilter.classList.add('d-none');
+            yearFilter.classList.add('d-none');
+
+            // Show relevant filter
+            switch(reportType) {
+                case 'date':
+                    dateFilter.classList.remove('d-none');
+                    break;
+                case 'week':
+                    weekFilterContainer.classList.remove('d-none');
+                    break;
+                case 'month':
+                    monthFilter.classList.remove('d-none');
+                    break;
+                case 'year':
+                    yearFilter.classList.remove('d-none');
+                    break;
+            }
+
+            applyFilters();
+        }
+
+        function handleDataTypeChange() {
+            const dataType = document.getElementById('dataType').value;
+            const tableHeader = document.getElementById('tableHeader');
+            
+            // Clear existing headers
+            tableHeader.innerHTML = '';
+            
+            // Create header row
+            const headerRow = document.createElement('tr');
+            
+            if (dataType === 'team') {
+                // Add headers for team data
+                teamColumns.forEach(column => {
+                    const th = document.createElement('th');
+                    th.textContent = column.label;
+                    headerRow.appendChild(th);
+                });
+            } else {
+                // Add headers for personal data
+                // First two columns are fixed
+                personalColumns.forEach(column => {
+                    const th = document.createElement('th');
+                    th.textContent = column.label;
+                    headerRow.appendChild(th);
+                });
+                
+                // Add staff names as column headers
+                staffList.forEach(staff => {
+                    const th = document.createElement('th');
+                    th.textContent = staff;
+                    headerRow.appendChild(th);
+                });
+            }
+            
+            tableHeader.appendChild(headerRow);
+            
+            applyFilters();
+        }
+
+        // Add loading state handling
+        function setLoading(isLoading) {
+            const button = document.querySelector('.btn-primary');
+            const overlay = document.getElementById('tableLoadingOverlay');
+            if (isLoading) {
+                button.disabled = true;
+                overlay.style.display = 'flex';
+            } else {
+                button.disabled = false;
+                overlay.style.display = 'none';
+            }
+        }
+
+        function applyFilters() {
+            setLoading(true);
+            const reportType = document.getElementById('reportType').value;
+            const dataType = document.getElementById('dataType').value;
+            let filterValue;
+
+            // Get filter value based on report type
+            switch(reportType) {
+                case 'date':
+                    const dateValue = document.getElementById('dateFilter').value;
+                    // Convert date to YYYY-MM-DD format
+                    const [year, month, day] = dateValue.split('-');
+                    filterValue = `${year}-${month}-${day}`;
+                    console.log('Date filter value:', filterValue); // Debug log
+                    break;
+                case 'week':
+                    // Lấy giá trị tháng và chuyển đổi format
+                    const weekMonthValue = document.getElementById('weekMonthFilter').value;
+                    const weekNumber = document.getElementById('weekNumberFilter').value;
+                    const [weekYear, weekMonth] = weekMonthValue.split('-');
+                    // Chuyển đổi sang format YY-MM và thêm số tuần
+                    const shortYear = weekYear.slice(-2);
+                    filterValue = `${shortYear}-${weekMonth}-${weekNumber}`;
+                    console.log('Week filter value:', filterValue); // Debug log
+                    break;
+                case 'month':
+                    const monthFilterValue = document.getElementById('monthFilter').value;
+                    const [monthYear, monthNumber] = monthFilterValue.split('-');
+                    // Chuyển đổi sang format YY-MM
+                    const shortMonthYear = monthYear.slice(-2);
+                    filterValue = `${shortMonthYear}-${monthNumber}`;
+                    console.log('Month filter value:', filterValue); // Debug log
+                    break;
+                case 'year':
+                    filterValue = document.getElementById('yearFilter').value;
+                    break;
+            }
+
+            // Call backend function to get filtered data
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    console.log('Backend response:', data); // Debug log
+                    updateTable(data);
+                    setLoading(false);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error:', error);
+                    handleError(error);
+                    setLoading(false);
+                })
+                .getLDteamData({
+                    reportType: reportType,
+                    filterValue: filterValue,
+                    dataType: dataType
+                });
+        }
+
+        // Add number formatting function
+        function formatNumber(number) {
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function updateTable(data) {
+            const tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = '';
+            const dataType = document.getElementById('dataType').value;
+            if (dataType === 'team') {
+                productDetails.forEach(pd => {
+                    // Lọc ra các chi tiết có dữ liệu
+                    const detailWithData = pd.details.filter(detail => {
+                        const beginValue = data[pd.product]?.[detail]?.begin || 0;
+                        const endValue = data[pd.product]?.[detail]?.end || 0;
+                        return !(beginValue === 0 && endValue === 0);
+                    });
+                    if (detailWithData.length === 0) return;
+                    detailWithData.forEach((detail, index) => {
+                        const beginValue = data[pd.product]?.[detail]?.begin || 0;
+                        const endValue = data[pd.product]?.[detail]?.end || 0;
+                        const row = document.createElement('tr');
+                        if (index === 0) {
+                            const tdProduct = document.createElement('td');
+                            tdProduct.textContent = pd.product;
+                            tdProduct.rowSpan = detailWithData.length;
+                            tdProduct.style.verticalAlign = 'middle';
+                            tdProduct.style.backgroundColor = '#f8f9fa';
+                            row.appendChild(tdProduct);
+                        }
+                        const tdDetail = document.createElement('td');
+                        tdDetail.textContent = detail;
+                        row.appendChild(tdDetail);
+                        const tdBegin = document.createElement('td');
+                        tdBegin.textContent = formatNumber(beginValue);
+                        if (beginValue > 0) tdBegin.style.backgroundColor = '#fff3e0';
+                        row.appendChild(tdBegin);
+                        const tdEnd = document.createElement('td');
+                        tdEnd.textContent = formatNumber(endValue);
+                        if (endValue > 0) tdEnd.style.backgroundColor = '#fff3e0';
+                        row.appendChild(tdEnd);
+                        const tdResult = document.createElement('td');
+                        let result = '';
+                        let color = '';
+                        if (endValue >= beginValue) {
+                            result = 'Đạt';
+                            color = 'green';
+                        } else {
+                            result = 'Không đạt';
+                            color = 'red';
+                        }
+                        tdResult.textContent = result;
+                        tdResult.style.color = color;
+                        tdResult.style.fontWeight = 'bold';
+                        row.appendChild(tdResult);
+                        tbody.appendChild(row);
+                    });
+                });
+            } else {
+                productDetails.forEach(pd => {
+                    // Lọc ra các chi tiết có dữ liệu cho từng nhóm
+                    const detailWithData = pd.details.filter(detail => {
+                        return staffList.some(staff => (data[pd.product]?.[detail]?.[staff] || 0) > 0);
+                    });
+                    if (detailWithData.length === 0) return;
+                    detailWithData.forEach((detail, index) => {
+                        const hasAnyValue = staffList.some(staff => {
+                            const value = data[pd.product]?.[detail]?.[staff] || 0;
+                            return value > 0;
+                        });
+                        if (!hasAnyValue) return;
+                        const row = document.createElement('tr');
+                        if (index === 0) {
+                            const tdProduct = document.createElement('td');
+                            tdProduct.textContent = pd.product;
+                            tdProduct.rowSpan = detailWithData.length;
+                            tdProduct.style.verticalAlign = 'middle';
+                            tdProduct.style.backgroundColor = '#f8f9fa';
+                            row.appendChild(tdProduct);
+                        }
+                        const tdDetail = document.createElement('td');
+                        tdDetail.textContent = detail;
+                        row.appendChild(tdDetail);
+                        staffList.forEach(staff => {
+                            const td = document.createElement('td');
+                            const value = data[pd.product]?.[detail]?.[staff] || 0;
+                            td.textContent = formatNumber(value);
+                            if (value > 0) td.style.backgroundColor = '#fff3e0';
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                });
+            }
+        }
+
+        function handleError(error) {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi tải dữ liệu');
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            const dateFilter = document.getElementById('dateFilter');
+            dateFilter.value = today;
+            dateFilter.classList.remove('d-none'); // Show date filter by default
+            
+            // Set current month and year as default
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth() + 1;
+            const currentYear = currentDate.getFullYear();
+            
+            // Format for month input (YYYY-MM)
+            const monthValue = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+            document.getElementById('monthFilter').value = monthValue;
+            document.getElementById('weekMonthFilter').value = monthValue; // Set default for week month filter
+            document.getElementById('yearFilter').value = currentYear;
+            
+            // Set week filter defaults
+            document.getElementById('weekNumberFilter').value = Math.ceil(currentDate.getDate() / 7);
+            
+            // Initialize table headers
+            handleDataTypeChange();
+            
+            // Load initial data
+            applyFilters();
+        });
+
+        // Thêm hàm chuyển đổi giao diện
+        function switchReportType() {
+            var type = document.getElementById('mainReportType').value;
+            document.getElementById('ldteamSection').style.display = (type === 'ldteam') ? 'block' : 'none';
+            document.getElementById('summarySection').style.display = (type === 'summary') ? 'block' : 'none';
+        }
+
+        // ================== JS cho phần Báo cáo tổng hợp ===================
+        const summaryProductOrder = ["FD", "Bond", "Casa", "CCQ", "Lending", "Thẻ tín dụng", "NFI", "TKMM"];
+        function summaryToggleInput() {
+            const mode = document.getElementById("summary-mode").value;
+            document.getElementById("summary-dateCol").classList.toggle("d-none", mode !== "date");
+            document.getElementById("summary-monthCol").classList.toggle("d-none", mode !== "month");
+            document.getElementById("summary-yearCol").classList.toggle("d-none", mode !== "year");
+            document.getElementById("summary-weekMonthCol").classList.toggle("d-none", mode !== "week");
+            document.getElementById("summary-weekCol").classList.toggle("d-none", mode !== "week");
+        }
+        function summaryToggleStaffSelect() {
+            const viewMode = document.getElementById("summary-viewMode").value;
+            document.getElementById("summary-staffCol").classList.toggle("d-none", viewMode !== "staff");
+        }
+        function summaryFormatNumber(val) {
+            if (!val || isNaN(val)) return val;
+            return Number(val).toLocaleString('vi-VN');
+        }
+        let summaryLoading = false;
+        function setSummaryLoading(isLoading) {
+            summaryLoading = isLoading;
+            const button = document.querySelector('#summarySection .btn-primary');
+            const overlay = document.getElementById('summaryTableLoadingOverlay');
+            if (isLoading) {
+                button.disabled = true;
+                overlay.style.display = 'flex';
+            } else {
+                button.disabled = false;
+                overlay.style.display = 'none';
+            }
+        }
+        function summaryLoadData() {
+            setSummaryLoading(true);
+            const mode = document.getElementById("summary-mode").value;
+            let param = {};
+            if (mode === "date") {
+                const dateInput = document.getElementById("summary-dateInput");
+                if (!dateInput.value) { alert("Vui lòng chọn ngày!"); setSummaryLoading(false); return; }
+                param.date = dateInput.value;
+            } else if (mode === "week") {
+                const month = document.getElementById("summary-monthSelect").value;
+                const week = document.getElementById("summary-weekSelect").value;
+                if (!month || !week) { alert("Vui lòng chọn đầy đủ tháng và tuần!"); setSummaryLoading(false); return; }
+                param.month = parseInt(month);
+                param.week = parseInt(week);
+            } else if (mode === "month") {
+                const monthInput = document.getElementById("summary-monthInput");
+                if (!monthInput.value) { alert("Vui lòng chọn tháng!"); setSummaryLoading(false); return; }
+                param.date = monthInput.value + "-01";
+            } else if (mode === "year") {
+                const yearInput = document.getElementById("summary-yearInput");
+                if (!yearInput.value) { alert("Vui lòng nhập năm!"); setSummaryLoading(false); return; }
+                const year = parseInt(yearInput.value);
+                if (isNaN(year) || year < 2000 || year > 2100) { alert("Vui lòng nhập năm hợp lệ (từ 2000 đến 2100)!"); setSummaryLoading(false); return; }
+                param.year = year;
+            }
+            const viewMode = document.getElementById("summary-viewMode").value;
+            if (viewMode === "staff") {
+                param.staff = document.getElementById("summary-staffSelect").value;
+            }
+            const body = document.getElementById("summary-reportBody");
+            body.innerHTML = '<tr><td colspan="5" class="loading">Đang tải dữ liệu...</td></tr>';
+            google.script.run.withSuccessHandler(function(data) {
+                summaryRenderReport(data);
+                setSummaryLoading(false);
+            }).withFailureHandler(function(error) {
+                body.innerHTML = '<tr><td colspan="5" style="color:red">Lỗi tải dữ liệu!</td></tr>';
+                setSummaryLoading(false);
+            }).getSummaryReportByDate(mode, param);
+        }
+        function summaryRenderReport(data) {
+            const body = document.getElementById('summary-reportBody');
+            body.innerHTML = '';
+            if (!data || !data.length) {
+                body.innerHTML = '<tr><td colspan="5">Không có dữ liệu phù hợp</td></tr>';
+                return;
+            }
+            const grouped = {};
+            data.forEach(row => {
+                if (!row.product || !row.detail) return;
+                if (!grouped[row.product]) grouped[row.product] = [];
+                grouped[row.product].push(row);
+            });
+            Object.keys(grouped)
+                .sort((a, b) => summaryProductOrder.indexOf(a) - summaryProductOrder.indexOf(b))
+                .forEach(product => {
+                    const rows = grouped[product];
+                    // Lọc bỏ những dòng có cả begin và end đều = 0
+                    const filteredRows = rows.filter(row => {
+                        const beginValue = parseFloat(row.begin) || 0;
+                        const endValue = parseFloat(row.end) || 0;
+                        return !(beginValue === 0 && endValue === 0);
+                    });
+                    
+                    // Nếu không còn dòng nào sau khi lọc, bỏ qua sản phẩm này
+                    if (filteredRows.length === 0) {
+                        return;
+                    }
+                    
+                    filteredRows.forEach((row, index) => {
+                        const tr = document.createElement('tr');
+                        const beginValue = parseFloat(row.begin) || 0;
+                        const endValue = parseFloat(row.end) || 0;
+                        const result = beginValue <= endValue ? 'Đạt' : 'Không đạt';
+                        const resultColor = result === 'Đạt' ? 'green' : 'red';
+                        tr.innerHTML = `
+                          ${index === 0 ? `<td class="product-name" rowspan="${filteredRows.length}">${product}</td>` : ''}
+                          <td class="detail-name">${row.detail}</td>
+                          <td class="${beginValue > 0 ? 'highlight' : ''}">${summaryFormatNumber(beginValue)}</td>
+                          <td class="${endValue > 0 ? 'highlight' : ''}">${summaryFormatNumber(endValue)}</td>
+                          <td style="color:${resultColor}; font-weight:bold">${result}</td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                });
+        }
+        // Set current month and year as default for summary section
+        document.addEventListener("DOMContentLoaded", function() {
+            // ... existing code ...
+            // Set default for summary section
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth() + 1;
+            const currentYear = currentDate.getFullYear();
+            document.getElementById("summary-monthSelect").value = currentMonth;
+            document.getElementById("summary-monthInput").value = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+            document.getElementById("summary-yearInput").value = currentYear;
+            // Set default date for summary-dateInput là hôm nay
+            const todayStr = currentDate.toISOString().split('T')[0];
+            document.getElementById("summary-dateInput").value = todayStr;
+            summaryToggleStaffSelect(); // Đảm bảo ẩn/hiện đúng khi load trang
+            // Tự động tải dữ liệu tổng hợp kinh doanh khi trang load
+            summaryLoadData();
+        });
+    </script>
+</body>
+</html> 

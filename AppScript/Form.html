@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f2f2f7;
+    }
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 24px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      font-size: 22px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+      width: 100%;
+      padding: 14px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 14px;
+      font-size: 16px;
+      box-sizing: border-box;
+      background-color: #fff;
+      font-family: inherit;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+    textarea {
+      resize: vertical;
+    }
+    .section {
+      border: none;
+      padding: 20px 16px;
+      margin-top: 20px;
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      display: none;
+    }
+    button {
+      width: 100%;
+      margin-top: 25px;
+      padding: 14px;
+      background: linear-gradient(to right, #ee3e25, #f68d1e);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 17px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>BÁO CÁO KINH DOANH</h2>
+
+  <label>Họ và tên: <span style="color:red">*</span></label>
+  <select id="name" required>
+    <option value="" disabled selected>-- Chọn tên --</option>
+  <option>KSV1</option>
+  <option>GDV1</option>
+  <option>SRM1</option>
+  <option>Trưởng phòng tín dụng</option>
+  <option>Tín dụng 1</option>
+  <option>Tín dụng 2</option>
+  <option>Tín dụng 3</option>
+  <option>Tín dụng 4</option>
+  </select>
+
+  <label>Chức danh: <span style="color:red">*</span></label>
+  <select id="title" required>
+    <option value="" disabled selected>-- Chọn chức danh --</option>
+    <option>KSV</option>
+    <option>GDV</option>
+    <option>Trưởng phòng</option>
+    <option>SRM</option>
+    <option>RM</option>
+    <option>Thực tập sinh</option>
+  </select>
+
+  <label>Loại báo cáo:</label>
+  <label><input type="checkbox" id="togglePlan" onchange="toggleSection()"> Báo cáo kế hoạch</label>
+  <label><input type="checkbox" id="toggleResult" onchange="toggleSection()"> Báo cáo kết quả</label>
+
+  <div class="section" id="plan-section">
+    <h3 style="color:#d84119;">📌 Báo cáo kế hoạch</h3>
+    <label>📅 Ngày báo cáo: <span style="color:red">*</span></label>
+    <input type="date" id="planDate" required>
+    <div id="planProductCheckboxes"></div>
+    <div id="planProductDetails"></div>
+
+    <label>🛠️ Công việc triển khai: <span style="color:red">*</span></label>
+    <textarea id="planTasks" required></textarea>
+
+    <label>📞 Số gọi:</label>
+    <input type="number" id="planGoi">
+    <label>📋 Chi tiết gọi:</label>
+    <textarea id="planGoiDetail"></textarea>
+
+    <label>📆 Số hẹn:</label>
+    <input type="number" id="planHen">
+    <label>📄 Chi tiết hẹn:</label>
+    <textarea id="planHenDetail"></textarea>
+
+    <label>👥 Số gặp:</label>
+    <input type="number" id="planGap">
+    <label>🗒️ Chi tiết gặp:</label>
+    <textarea id="planGapDetail"></textarea>
+
+    <label>➕ Công việc khác:</label>
+    <textarea id="planOtherTasks"></textarea>
+    <label>🧾 Ghi chú:</label>
+    <textarea id="planNotes"></textarea>
+  </div>
+
+  <div class="section" id="result-section">
+    <h3 style="color:#d84119;">📊 Báo cáo kết quả</h3>
+    <label>📅 Ngày báo cáo: <span style="color:red">*</span></label>
+    <input type="date" id="resultDate" required>
+    <div id="resultProductCheckboxes"></div>
+    <div id="resultProductDetails"></div>
+
+    <label>🛠️ Công việc triển khai: <span style="color:red">*</span></label>
+    <textarea id="resultTasks" required></textarea>
+
+    <label>📞 Số gọi:</label>
+    <input type="number" id="resultGoi">
+    <label>📋 Chi tiết gọi:</label>
+    <textarea id="resultGoiDetail"></textarea>
+
+    <label>📆 Số hẹn:</label>
+    <input type="number" id="resultHen">
+    <label>📄 Chi tiết hẹn:</label>
+    <textarea id="resultHenDetail"></textarea>
+
+    <label>👥 Số gặp:</label>
+    <input type="number" id="resultGap">
+    <label>🗒️ Chi tiết gặp:</label>
+    <textarea id="resultGapDetail"></textarea>
+
+    <label>➕ Công việc khác:</label>
+    <textarea id="resultOtherTasks"></textarea>
+    <label>🧾 Ghi chú:</label>
+    <textarea id="resultNotes"></textarea>
+  </div>
+
+  <button type="button" id="submitBtn" onclick="submitForm()">📤 Gửi báo cáo</button>
+  <div id="loadingSpinner" style="display:none; text-align:center; margin-top:20px;">
+    <div id="spinnerIcon">
+      <svg width="48" height="48" viewBox="0 0 50 50">
+        <circle cx="25" cy="25" r="20" fill="none" stroke="#ee3e25" stroke-width="5" stroke-linecap="round" stroke-dasharray="31.4 31.4" transform="rotate(-90 25 25)">
+          <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+      <div style="color:#ee3e25; font-weight:bold;" id="spinnerText">Đang gửi báo cáo...</div>
+      <div style="color:#888; font-size:14px; margin-top:4px;" id="spinnerNote">Việc này có thể mất đến 30 giây, vui lòng chờ...</div>
+    </div>
+    <div id="successIcon" style="display:none;">
+      <svg width="48" height="48" viewBox="0 0 50 50">
+        <circle cx="25" cy="25" r="20" fill="none" stroke="#28a745" stroke-width="5"/>
+        <polyline points="16,27 23,34 36,19" fill="none" stroke="#28a745" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div style="color:#28a745; font-weight:bold;">Gửi báo cáo thành công!</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Cache DOM elements
+const domCache = {
+  planSection: null,
+  resultSection: null,
+  togglePlan: null,
+  toggleResult: null
+};
+
+// Initialize DOM cache
+function initDomCache() {
+  domCache.planSection = document.getElementById("plan-section");
+  domCache.resultSection = document.getElementById("result-section");
+  domCache.togglePlan = document.getElementById("togglePlan");
+  domCache.toggleResult = document.getElementById("toggleResult");
+}
+
+// Optimized toggle section function
+function toggleSection() {
+  domCache.planSection.style.display = domCache.togglePlan.checked ? "block" : "none";
+  domCache.resultSection.style.display = domCache.toggleResult.checked ? "block" : "none";
+}
+
+// Product configuration
+const productDetailMap = {
+  'Casa': ['CASA BQ tăng net'],
+  'CCQ': ['CCQ BQ tăng net'],
+  'Bond': ['Bond mới', 'Bond gia hạn'],
+  'FD': ['FD mới', 'FD gia hạn'],
+  'Lending': ['Trình', 'Phê duyệt', 'GN - Tín chấp', 'GN - Thế chấp', 'GN - Ứng vốn'],
+  'Thẻ tín dụng': ['Trình', 'Phê duyệt', 'Active', 'Chi tiêu'],
+  'TKMM': ['Tự mở', 'CTV', 'Activation', 'MassAff'],
+  'NFI': ['TKSĐ', 'FX', 'Banca NT', 'Banca PNT', 'Khác']
+};
+
+const unitMap = {
+  'Casa': '(Triệu đồng)',
+  'CCQ': '(Triệu đồng)',
+  'Bond': '(Triệu đồng)',
+  'FD': '(Triệu đồng)',
+  'Lending': '(Triệu đồng)',
+  'NFI': '(Triệu đồng)',
+  'Thẻ tín dụng': '(Thẻ)',
+  'TKMM': '(Tài khoản)'
+};
+
+// Optimized render products function
+function renderProducts(section) {
+  const checkboxesDiv = document.getElementById(section + 'ProductCheckboxes');
+  const detailsDiv = document.getElementById(section + 'ProductDetails');
+  
+  // Clear existing content
+  checkboxesDiv.innerHTML = '';
+  detailsDiv.innerHTML = '';
+
+  // Create document fragment for better performance
+  const checkboxFragment = document.createDocumentFragment();
+  const detailFragment = document.createDocumentFragment();
+
+  // No products are visually marked as required anymore
+  const requiredProducts = [];
+
+  for (let product in productDetailMap) {
+    const productId = section + '-' + product.replace(/\s/g, '');
+    const blockId = productId + '-block';
+    const isRequired = requiredProducts.includes(product);
+
+    // Create checkbox label
+    const checkboxLabel = document.createElement('label');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = productId;
+    checkbox.onclick = () => document.getElementById(blockId).style.display = checkbox.checked ? 'block' : 'none';
+    checkboxLabel.appendChild(checkbox);
+    checkboxLabel.appendChild(document.createTextNode(' ' + product));
+    if (isRequired) {
+      const requiredSpan = document.createElement('span');
+      requiredSpan.style.color = 'red';
+      requiredSpan.textContent = ' *';
+      checkboxLabel.appendChild(requiredSpan);
+    }
+    checkboxFragment.appendChild(checkboxLabel);
+
+    // Create product block
+    const productBlock = document.createElement('div');
+    productBlock.className = 'product-block';
+    productBlock.id = blockId;
+    productBlock.style.display = 'none';
+
+    const productTitle = document.createElement('strong');
+    productTitle.textContent = product;
+    if (isRequired) {
+      const requiredSpan = document.createElement('span');
+      requiredSpan.style.color = 'red';
+      requiredSpan.textContent = ' *';
+      productTitle.appendChild(requiredSpan);
+    }
+    productBlock.appendChild(productTitle);
+    productBlock.appendChild(document.createElement('br'));
+
+    productDetailMap[product].forEach(detail => {
+      const detailRow = document.createElement('div');
+      detailRow.className = 'detail-row';
+      
+      const inputId = `${section}-${product}-${detail}`.replace(/\s/g, '');
+      const unit = unitMap[product] || '';
+      
+      // Add customer name input for Lending and Thẻ tín dụng
+      if (product === 'Lending' || product === 'Thẻ tín dụng') {
+        const customerInputId = `${section}-${product}-${detail}-customer`.replace(/\s/g, '');
+        detailRow.innerHTML = `
+          <div style="margin-bottom: 8px;">
+            <strong>${detail}:</strong> <input type="number" id="${inputId}" placeholder="${unit}" />
+          </div>
+          <div style="margin-bottom: 12px; margin-left: 20px;">
+            Tên khách hàng: <input type="text" id="${customerInputId}" placeholder="Nhập tên khách hàng" />
+          </div>
+        `;
+      } else {
+        detailRow.innerHTML = `<strong>${detail}:</strong> <input type="number" id="${inputId}" placeholder="${unit}" />`;
+      }
+      productBlock.appendChild(detailRow);
+    });
+
+    detailFragment.appendChild(productBlock);
+  }
+
+  checkboxesDiv.appendChild(checkboxFragment);
+  detailsDiv.appendChild(detailFragment);
+}
+
+// Optimized get details function
+function getDetails(section) {
+  const result = [];
+  for (let product in productDetailMap) {
+    productDetailMap[product].forEach(detail => {
+      const inputId = `${section}-${product}-${detail}`.replace(/\s/g, '');
+      const inputElement = document.getElementById(inputId);
+      let numericValue = parseFloat(inputElement.value) || 0;
+
+      if (unitMap[product] === '(Triệu đồng)') {
+        numericValue *= 1000000;
+      }
+
+      // Add customer name for Lending and Thẻ tín dụng
+      let customerName = '';
+      if (product === 'Lending' || product === 'Thẻ tín dụng') {
+        const customerInputId = `${section}-${product}-${detail}-customer`.replace(/\s/g, '');
+        const customerElement = document.getElementById(customerInputId);
+        customerName = customerElement ? customerElement.value : '';
+      }
+
+      result.push({ 
+        product, 
+        detail, 
+        value: numericValue,
+        customerName: customerName 
+      });
+    });
+  }
+  return result;
+}
+
+// Optimized form submission
+function submitForm() {
+  const formData = {
+    name: document.getElementById("name").value,
+    title: document.getElementById("title").value,
+    planDate: document.getElementById("planDate")?.value,
+    resultDate: document.getElementById("resultDate")?.value,
+    isPlanChecked: domCache.togglePlan.checked,
+    isResultChecked: domCache.toggleResult.checked
+  };
+
+  // Validation
+  if (!formData.name || !formData.title) {
+    alert("Vui lòng nhập đầy đủ Họ và tên và Chức danh.");
+    return;
+  }
+
+  if (formData.isPlanChecked && !formData.planDate) {
+    alert("Vui lòng nhập Ngày báo cáo kế hoạch.");
+    return;
+  }
+
+  if (formData.isPlanChecked && !document.getElementById("planTasks").value.trim()) {
+    alert("Vui lòng nhập Công việc triển khai cho báo cáo kế hoạch.");
+    return;
+  }
+
+  if (formData.isResultChecked && !formData.resultDate) {
+    alert("Vui lòng nhập Ngày báo cáo kết quả.");
+    return;
+  }
+
+  if (formData.isResultChecked && !document.getElementById("resultTasks").value.trim()) {
+    alert("Vui lòng nhập Công việc triển khai cho báo cáo kết quả.");
+    return;
+  }
+
+  if (!formData.isPlanChecked && !formData.isResultChecked) {
+    alert("Vui lòng chọn ít nhất một loại báo cáo (Kế hoạch hoặc Kết quả).");
+    return;
+  }
+
+  // Prepare data object
+  const data = {
+    name: formData.name,
+    title: formData.title,
+    planDate: formData.planDate,
+    planDetails: getDetails("plan"),
+    planTasks: document.getElementById("planTasks").value,
+    planGoi: document.getElementById("planGoi").value,
+    planGoiDetail: document.getElementById("planGoiDetail").value,
+    planHen: document.getElementById("planHen").value,
+    planHenDetail: document.getElementById("planHenDetail").value,
+    planGap: document.getElementById("planGap").value,
+    planGapDetail: document.getElementById("planGapDetail").value,
+    planOtherTasks: document.getElementById("planOtherTasks").value,
+    planNotes: document.getElementById("planNotes").value,
+
+    resultDate: formData.resultDate,
+    resultDetails: getDetails("result"),
+    resultTasks: document.getElementById("resultTasks").value,
+    resultGoi: document.getElementById("resultGoi").value,
+    resultGoiDetail: document.getElementById("resultGoiDetail").value,
+    resultHen: document.getElementById("resultHen").value,
+    resultHenDetail: document.getElementById("resultHenDetail").value,
+    resultGap: document.getElementById("resultGap").value,
+    resultGapDetail: document.getElementById("resultGapDetail").value,
+    resultOtherTasks: document.getElementById("resultOtherTasks").value,
+    resultNotes: document.getElementById("resultNotes").value
+  };
+
+  // Hiện loading, ẩn nút gửi, reset trạng thái icon
+  document.getElementById("loadingSpinner").style.display = "block";
+  document.getElementById("submitBtn").style.display = "none";
+  document.getElementById("spinnerIcon").style.display = "block";
+  document.getElementById("successIcon").style.display = "none";
+
+  // Submit form
+  google.script.run
+    .withSuccessHandler(() => {
+      // Ẩn spinner, hiện tick và thông báo thành công
+      document.getElementById("spinnerIcon").style.display = "none";
+      document.getElementById("successIcon").style.display = "block";
+      // Không hiện lại nút gửi, giữ tick một lúc rồi có thể reset form nếu muốn
+      // setTimeout(() => {
+      //   document.getElementById("loadingSpinner").style.display = "none";
+      //   document.getElementById("submitBtn").style.display = "block";
+      // }, 2000);
+    })
+    .withFailureHandler(err => {
+      document.getElementById("loadingSpinner").style.display = "none";
+      document.getElementById("submitBtn").style.display = "block";
+      alert("❌ Lỗi: " + err.message);
+    })
+    .submitForm(data);
+}
+
+// Initialize on page load
+document.addEventListener("DOMContentLoaded", () => {
+  initDomCache();
+  toggleSection();
+  renderProducts('plan');
+  renderProducts('result');
+});
+</script>

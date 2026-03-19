@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cam kết kinh doanh</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background: #fff;
+      color: #222;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+    .container {
+      max-width: 100vw;
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      background: #fff;
+      border-radius: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    h2 {
+      text-align: center;
+      color: #1976d2;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+      margin-top: 18px;
+    }
+    .filter {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 10px 14px;
+      margin-bottom: 18px;
+      background: #fafbfc;
+      border-radius: 8px;
+      padding: 10px 8px 6px 8px;
+    }
+    .filter select {
+      padding: 7px 12px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      color: #222;
+      min-width: 100px;
+      margin: 0;
+    }
+    .table-container {
+      flex: 1 1 0;
+      width: 100vw;
+      max-width: 100vw;
+      height: 100%;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      border-radius: 0;
+      background: #fff;
+      margin-top: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 0;
+      overflow: hidden;
+      min-width: 1200px;
+    }
+    th, td {
+      padding: 10px 6px;
+      text-align: center;
+    }
+    thead th {
+      background: #fafbfc;
+      color: #222;
+      font-weight: 600;
+      font-size: 1rem;
+      border-bottom: 1.5px solid #e0e0e0;
+    }
+    td {
+      border-bottom: 1px solid #f1f1f1;
+      font-size: 0.97rem;
+    }
+    .loading {
+      text-align: center;
+      margin-top: 18px;
+      font-style: italic;
+      color: #bdbdbd;
+    }
+    @media (max-width: 900px) {
+      .container {
+        padding: 8px 2vw 8px 2vw;
+        max-width: 100vw;
+        width: 100vw;
+      }
+      .filter {
+        flex-direction: column;
+        gap: 8px 0;
+        padding: 8px 2px 6px 2px;
+      }
+      th, td {
+        padding: 7px 2px;
+        font-size: 0.95rem;
+      }
+      table {
+        min-width: 900px;
+      }
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 2px 0 2px 0;
+      }
+      h2 {
+        font-size: 1.1rem;
+      }
+      .filter {
+        padding: 4px 1px 2px 1px;
+      }
+      .table-container {
+        max-height: 300px;
+      }
+      table {
+        min-width: 600px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Cam kết kinh doanh</h2>
+    <div class="filter">
+      <button id="reloadBtn" class="btn btn-primary" style="min-width:170px; font-weight:600;" type="button">
+        <i class="fas fa-sync-alt me-2"></i>Tải lại dữ liệu
+      </button>
+      <select id="monthFilter">
+        <option value="">Chọn tháng</option>
+        <option value="1">Tháng 1</option>
+        <option value="2">Tháng 2</option>
+        <option value="3">Tháng 3</option>
+        <option value="4">Tháng 4</option>
+        <option value="5">Tháng 5</option>
+        <option value="6">Tháng 6</option>
+        <option value="7">Tháng 7</option>
+        <option value="8">Tháng 8</option>
+        <option value="9">Tháng 9</option>
+        <option value="10">Tháng 10</option>
+        <option value="11">Tháng 11</option>
+        <option value="12">Tháng 12</option>
+      </select>
+      <select id="weekFilter">
+        <option value="">Chọn tuần</option>
+        <option value="1">Tuần 1</option>
+        <option value="2">Tuần 2</option>
+        <option value="3">Tuần 3</option>
+        <option value="4">Tuần 4</option>
+        <option value="5">Tuần 5</option>
+      </select>
+      <select id="employeeFilter">
+        <option value="">Tổng hợp</option>
+        <option value="Team LD">Team LD</option>
+        <option value="KSV1">KSV1</option>
+        <option value="GDV1">GDV1</option>
+        <option value="SRM1">SRM1</option>
+        <option value="Trưởng phòng tín dụng">Trưởng phòng tín dụng</option>
+        <option value="Tín dụng 1">Tín dụng 1</option>
+        <option value="Tín dụng 2">Tín dụng 2</option>
+        <option value="Tín dụng 3">Tín dụng 3</option>
+        <option value="Tín dụng 4">Tín dụng 4</option>
+      </select>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Sản phẩm</th>
+            <th>Chi tiết sản phẩm</th>
+            <th>Kế hoạch</th>
+            <th>Thực hiện</th>
+            <th>Gap</th>
+            <th>Lũy kế</th>
+            <th>Gap lũy kế</th>
+            <th id="lastColHeader">Người cam kết</th>
+          </tr>
+        </thead>
+        <tbody id="reportBody">
+          <tr><td colspan="8" class="loading">Đang tải dữ liệu...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Cấu trúc dữ liệu cố định cho bảng
+    const tableStructure = [
+      { product: 'Lending', detail: 'Trình', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'Lending', detail: 'Phê duyệt', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'Lending', detail: 'Giải ngân', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'NFI', detail: 'TKSĐ', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'NFI', detail: 'FX', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'NFI', detail: 'Banca NT', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'NFI', detail: 'Banca PNT', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'NFI', detail: 'Khác', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'Thẻ tín dụng', detail: 'Trình', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'Thẻ tín dụng', detail: 'Chi tiêu', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'Thẻ tín dụng', detail: 'Active', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'TKMM', detail: 'Tự mở', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'TKMM', detail: 'CTV', keHoach: 0, thucHien: 0, luyKe: 0 },
+      { product: 'TKMM', detail: 'Activation', keHoach: 0, thucHien: 0, luyKe: 0 }
+    ];
+
+    // Hàm format số với dấu chấm ngăn cách hàng nghìn
+    function formatNumber(num) {
+      if (num === null || num === undefined) return '';
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Hàm xử lý loading state cho nút reload
+    function setReloadLoading(isLoading) {
+      const btn = document.getElementById('reloadBtn');
+      if (isLoading) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang tải...';
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Tải lại dữ liệu';
+      }
+    }
+
+    // Hàm tính tuần trong tháng
+    function getWeekOfMonth(date) {
+      const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+      const firstDayWeek = firstDay.getDay();
+      const dayOfMonth = date.getDate();
+      const weekOfMonth = Math.ceil((dayOfMonth + firstDayWeek) / 7);
+      return weekOfMonth;
+    }
+
+    // Hàm tự động chọn tháng và tuần theo ngày hiện tại
+    function setCurrentDateFilters() {
+      const today = new Date();
+      const currentMonth = today.getMonth() + 1; // getMonth() trả về 0-11
+      const currentWeek = getWeekOfMonth(today);
+      
+      // Chọn tháng hiện tại
+      const monthFilter = document.getElementById('monthFilter');
+      monthFilter.value = currentMonth.toString();
+      
+      // Chọn tuần hiện tại (giới hạn tối đa 5 tuần)
+      const weekFilter = document.getElementById('weekFilter');
+      const weekToSelect = Math.min(currentWeek, 5);
+      weekFilter.value = weekToSelect.toString();
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('reportBody');
+      let lastProduct = null;
+      let productRowspan = {};
+      // Xác định tiêu đề cột cuối cùng
+      const employee = document.getElementById('employeeFilter').value;
+      const lastColHeader = document.getElementById('lastColHeader');
+      if (employee && employee !== '' && employee !== 'Team LD') {
+        lastColHeader.textContent = 'Kế hoạch cam kết';
+      } else {
+        lastColHeader.textContent = 'Người cam kết';
+      }
+      // Tính rowspan cho từng sản phẩm
+      tableStructure.forEach(item => {
+        productRowspan[item.product] = (productRowspan[item.product] || 0) + 1;
+      });
+      tbody.innerHTML = tableStructure.map((item, index) => {
+        let productCell = '';
+        if (lastProduct !== item.product) {
+          productCell = `<td rowspan="${productRowspan[item.product]}">${item.product}</td>`;
+          lastProduct = item.product;
+        }
+        // Tìm dữ liệu tương ứng từ server
+        const serverData = data.find(d => d.product === item.product && d.detail === item.detail);
+        const keHoach = serverData ? serverData.keHoach : 0;
+        const thucHien = serverData ? serverData.thucHien : 0;
+        const luyKe = serverData ? serverData.luyKe : 0;
+        const bmKeHoach = serverData ? serverData.bmKeHoach : 0;
+        const nguoiCamKet = serverData ? serverData.nguoiCamKet : '';
+        const keHoachCamKet = serverData && typeof serverData.keHoachCamKet !== 'undefined' ? serverData.keHoachCamKet : (serverData && typeof serverData.bmKeHoach !== 'undefined' ? serverData.bmKeHoach : '');
+        const gap = thucHien - keHoach;
+        const gapLuyKe = luyKe - bmKeHoach;
+        
+        // Xác định màu sắc và nội dung cho cột Gap
+        let gapContent = '';
+        let gapStyle = '';
+        
+        if (keHoach === 0 && thucHien === 0) {
+          gapContent = 'Không cam kết';
+          gapStyle = 'color: #dc3545; font-weight: 700;'; // Đỏ, in đậm
+        } else {
+          gapContent = formatNumber(gap);
+          if (gap > 0) {
+            gapStyle = 'color: #28a745; font-weight: 600;'; // Xanh lá - vượt kế hoạch
+          } else if (gap < 0) {
+            gapStyle = 'color: #dc3545; font-weight: 600;'; // Đỏ - chưa đạt kế hoạch
+          }
+        }
+        
+        // Xác định màu sắc và nội dung cho cột Gap lũy kế
+        let gapLuyKeContent = '';
+        let gapLuyKeStyle = '';
+        
+        if (bmKeHoach === 0 && luyKe === 0) {
+          gapLuyKeContent = 'Không cam kết';
+          gapLuyKeStyle = 'color: #dc3545; font-weight: 700;'; // Đỏ, in đậm
+        } else {
+          gapLuyKeContent = formatNumber(gapLuyKe);
+          if (gapLuyKe > 0) {
+            gapLuyKeStyle = 'color: #28a745; font-weight: 600;'; // Xanh lá - vượt kế hoạch
+          } else if (gapLuyKe < 0) {
+            gapLuyKeStyle = 'color: #dc3545; font-weight: 600;'; // Đỏ - chưa đạt kế hoạch
+          } else {
+            gapLuyKeStyle = 'color: #6c757d; font-weight: 600;'; // Xám - đạt đúng kế hoạch
+          }
+        }
+        
+        // Cột cuối: tuỳ theo lựa chọn
+        let lastColContent = '';
+        if (employee && employee !== '' && employee !== 'Team LD') {
+          // Nếu chọn nhân viên cụ thể, hiển thị Kế hoạch cam kết (có thể là text, không chỉ số)
+          lastColContent = (serverData && typeof serverData.keHoachCamKet !== 'undefined') ? serverData.keHoachCamKet : '';
+        } else {
+          // Tổng hợp hoặc Team LD: hiển thị Người cam kết
+          lastColContent = nguoiCamKet;
+        }
+        
+        return `<tr>
+          ${productCell}
+          <td>${item.detail}</td>
+          <td>${formatNumber(keHoach)}</td>
+          <td>${formatNumber(thucHien)}</td>
+          <td style="${gapStyle}">${gapContent}</td>
+          <td>${formatNumber(luyKe)}</td>
+          <td style="${gapLuyKeStyle}">${gapLuyKeContent}</td>
+          <td>${lastColContent}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Hàm xử lý khi filter thay đổi
+    function handleFilterChange() {
+      const month = document.getElementById('monthFilter').value;
+      const week = document.getElementById('weekFilter').value;
+      const employee = document.getElementById('employeeFilter').value;
+      
+      // Hiển thị loading state
+      setReloadLoading(true);
+      
+      // Gọi server-side function để lấy dữ liệu đã lọc
+      google.script.run
+        .withSuccessHandler(function(data) {
+          renderTable(data);
+          setReloadLoading(false);
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error fetching data:', error);
+          renderTable([]);
+          setReloadLoading(false);
+        })
+        .getCKKDataWithFilter({
+          month: month,
+          week: week,
+          employee: employee,
+          includeCumulative: true // Thêm flag để server biết cần trả về cả dữ liệu lũy kế
+        });
+    }
+
+    // Hàm reload dữ liệu
+    function reloadData() {
+      setReloadLoading(true);
+      
+      const month = document.getElementById('monthFilter').value;
+      const week = document.getElementById('weekFilter').value;
+      const employee = document.getElementById('employeeFilter').value;
+      
+      // Gọi server-side function để lấy dữ liệu đã lọc
+      google.script.run
+        .withSuccessHandler(function(data) {
+          renderTable(data);
+          setReloadLoading(false);
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error fetching data:', error);
+          renderTable([]);
+          setReloadLoading(false);
+        })
+        .getCKKDataWithFilter({
+          month: month,
+          week: week,
+          employee: employee,
+          includeCumulative: true // Thêm flag để server biết cần trả về cả dữ liệu lũy kế
+        });
+    }
+
+    // Render bảng khi trang load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Tự động chọn tháng và tuần theo ngày hiện tại
+      setCurrentDateFilters();
+      
+      // Load dữ liệu ban đầu
+      handleFilterChange();
+      
+      // Thêm event listeners cho các filter
+      document.getElementById('monthFilter').addEventListener('change', handleFilterChange);
+      document.getElementById('weekFilter').addEventListener('change', handleFilterChange);
+      document.getElementById('employeeFilter').addEventListener('change', handleFilterChange);
+      
+      // Thêm event listener cho nút reload
+      document.getElementById('reloadBtn').addEventListener('click', reloadData);
+    });
+  </script>
+</body>
+</html> 
